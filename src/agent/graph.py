@@ -192,7 +192,7 @@ async def prompt_rejecter(state: State, runtime: Runtime[ContextSchema]) -> Stat
         messages = messages_to_remove
     )
 
-graphName = "Room Evaluator Agent"
+graphName = "Room Logic Agent"
 graph = ( 
     StateGraph(State, context_schema =ContextSchema)
     .add_node("room_evaluator",room_evaluator)
