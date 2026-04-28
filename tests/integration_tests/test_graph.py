@@ -129,7 +129,7 @@ async def test_conversation() -> None:
         { "messages": [HumanMessage("What is your purpose?")] },
         { "messages": [HumanMessage("how do I use you?")] },
         { "messages": [HumanMessage("how do I provide you a picture?")] },
-        { "messages": [HumanMessage("Here is my room: 'static\\dirty_room.jpg'")] }
+        { "messages": [HumanMessage("Here is my room: 'static/dirty_room.jpg'")] }
     ]
     num = 0
     for message in user_messages:
