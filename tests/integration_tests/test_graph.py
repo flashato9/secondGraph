@@ -80,37 +80,37 @@ async def test_what_is_your_purpose() -> None:
 
 @pytest.mark.langsmith
 async def test_how_do_you_work() -> None:
-#     # --- ARRANGE ---
-#     agent_persona = (
-#             AGENT_PERSONA
-#             )
-#     user_prompt = "How do you work?"
-#     initial_state = {
-#         "messages": [
-#             HumanMessage(user_prompt)
-#             ]
-#     }
+    # --- ARRANGE ---
+    agent_persona = (
+            AGENT_PERSONA
+            )
+    user_prompt = "How do you work?"
+    initial_state = {
+        "messages": [
+            HumanMessage(user_prompt)
+            ]
+    }
 
-#     context_instance = ContextSchema(
-#         llm_configuration = LLMConfiguration(),
-#         persona = agent_persona
-#     )
-#     # --- ACT ---
-#     config = {"configurable": {"thread_id": "flow_test"}}
-#     res = await graph.ainvoke(initial_state,config, context = context_instance)
-#     # --- ASSERT ---
-#     evaluation = await judge_chain.ainvoke({
-#         "persona": context_instance.persona,
-#         "user_input": user_prompt,
-#         "agent_output": res["messages"][-1].content
-#     })
-#     print(f"Agent Persona:{agent_persona}")
-#     print(f"Agent Initial State: {initial_state}")
-#     print(f"Agent Output: {res["messages"][-1].content}")
-#     print(f"Judge Score: {evaluation.score}")
-#     print(f"Judge Reasoning: {evaluation.reasoning}")
+    context_instance = ContextSchema(
+        llm_configuration = LLMConfiguration(),
+        persona = agent_persona
+    )
+    # --- ACT ---
+    config = {"configurable": {"thread_id": "flow_test"}}
+    res = await graph.ainvoke(initial_state,config, context = context_instance)
+    # --- ASSERT ---
+    evaluation = await judge_chain.ainvoke({
+        "persona": context_instance.persona,
+        "user_input": user_prompt,
+        "agent_output": res["messages"][-1].content
+    })
+    print(f"Agent Persona:{agent_persona}")
+    print(f"Agent Initial State: {initial_state}")
+    print(f"Agent Output: {res["messages"][-1].content}")
+    print(f"Judge Score: {evaluation.score}")
+    print(f"Judge Reasoning: {evaluation.reasoning}")
     
-#     assert evaluation.is_correct, f"Judge failed the response: {evaluation.reasoning}"
+    assert evaluation.is_correct, f"Judge failed the response: {evaluation.reasoning}"
 
 @pytest.mark.langsmith
 async def test_conversation() -> None:
