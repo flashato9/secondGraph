@@ -10,76 +10,76 @@ from agent import judge_chain, AGENT_PERSONA
 pytestmark = pytest.mark.asyncio(loop_scope="module")
 
 
-# @pytest.mark.langsmith
-# async def test_hello() -> None:
-#     # --- ARRANGE ---
-#     agent_persona = (
-#             AGENT_PERSONA
-#             )
-#     user_prompt = "hello"
-#     initial_state = {
-#         "messages": [
-#             HumanMessage(user_prompt)
-#             ]
-#     }
+@pytest.mark.langsmith
+async def test_hello() -> None:
+    # --- ARRANGE ---
+    agent_persona = (
+            AGENT_PERSONA
+            )
+    user_prompt = "hello"
+    initial_state = {
+        "messages": [
+            HumanMessage(user_prompt)
+            ]
+    }
 
-#     context_instance = ContextSchema(
-#         llm_configuration = LLMConfiguration(),
-#         persona = agent_persona
-#     )
-#     # --- ACT ---
-#     config = {"configurable": {"thread_id": "flow_test"}}
-#     res = await graph.ainvoke(initial_state,config, context = context_instance)
-#     # --- ASSERT ---
-#     evaluation = await judge_chain.ainvoke({
-#         "persona": context_instance.persona,
-#         "user_input": user_prompt,
-#         "agent_output": res["messages"][-1].content
-#     })
-#     print(f"Agent Persona:{agent_persona}")
-#     print(f"Agent Initial State: {initial_state}")
-#     print(f"Agent Output: {res["messages"][-1].content}")
-#     print(f"Judge Score: {evaluation.score}")
-#     print(f"Judge Reasoning: {evaluation.reasoning}")
+    context_instance = ContextSchema(
+        llm_configuration = LLMConfiguration(),
+        persona = agent_persona
+    )
+    # --- ACT ---
+    config = {"configurable": {"thread_id": "flow_test"}}
+    res = await graph.ainvoke(initial_state,config, context = context_instance)
+    # --- ASSERT ---
+    evaluation = await judge_chain.ainvoke({
+        "persona": context_instance.persona,
+        "user_input": user_prompt,
+        "agent_output": res["messages"][-1].content
+    })
+    print(f"Agent Persona:{agent_persona}")
+    print(f"Agent Initial State: {initial_state}")
+    print(f"Agent Output: {res["messages"][-1].content}")
+    print(f"Judge Score: {evaluation.score}")
+    print(f"Judge Reasoning: {evaluation.reasoning}")
     
-#     assert evaluation.is_correct, f"Judge failed the response: {evaluation.reasoning}"
+    assert evaluation.is_correct, f"Judge failed the response: {evaluation.reasoning}"
 
-# @pytest.mark.langsmith
-# async def test_what_is_your_purpose() -> None:
-#     # --- ARRANGE ---
-#     agent_persona = (
-#             AGENT_PERSONA
-#             )
-#     user_prompt = "What is your purpose?"
-#     initial_state = {
-#         "messages": [
-#             HumanMessage(user_prompt)
-#             ]
-#     }
+@pytest.mark.langsmith
+async def test_what_is_your_purpose() -> None:
+    # --- ARRANGE ---
+    agent_persona = (
+            AGENT_PERSONA
+            )
+    user_prompt = "What is your purpose?"
+    initial_state = {
+        "messages": [
+            HumanMessage(user_prompt)
+            ]
+    }
 
-#     context_instance = ContextSchema(
-#         llm_configuration = LLMConfiguration(),
-#         persona = agent_persona
-#     )
-#     # --- ACT ---
-#     config = {"configurable": {"thread_id": "flow_test"}}
-#     res = await graph.ainvoke(initial_state,config, context = context_instance)
-#     # --- ASSERT ---
-#     evaluation = await judge_chain.ainvoke({
-#         "persona": context_instance.persona,
-#         "user_input": user_prompt,
-#         "agent_output": res["messages"][-1].content
-#     })
-#     print(f"Agent Persona:{agent_persona}")
-#     print(f"Agent Initial State: {initial_state}")
-#     print(f"Agent Output: {res["messages"][-1].content}")
-#     print(f"Judge Score: {evaluation.score}")
-#     print(f"Judge Reasoning: {evaluation.reasoning}")
+    context_instance = ContextSchema(
+        llm_configuration = LLMConfiguration(),
+        persona = agent_persona
+    )
+    # --- ACT ---
+    config = {"configurable": {"thread_id": "flow_test"}}
+    res = await graph.ainvoke(initial_state,config, context = context_instance)
+    # --- ASSERT ---
+    evaluation = await judge_chain.ainvoke({
+        "persona": context_instance.persona,
+        "user_input": user_prompt,
+        "agent_output": res["messages"][-1].content
+    })
+    print(f"Agent Persona:{agent_persona}")
+    print(f"Agent Initial State: {initial_state}")
+    print(f"Agent Output: {res["messages"][-1].content}")
+    print(f"Judge Score: {evaluation.score}")
+    print(f"Judge Reasoning: {evaluation.reasoning}")
     
-#     assert evaluation.is_correct, f"Judge failed the response: {evaluation.reasoning}"
+    assert evaluation.is_correct, f"Judge failed the response: {evaluation.reasoning}"
 
-# @pytest.mark.langsmith
-# async def test_how_do_you_work() -> None:
+@pytest.mark.langsmith
+async def test_how_do_you_work() -> None:
 #     # --- ARRANGE ---
 #     agent_persona = (
 #             AGENT_PERSONA
@@ -125,11 +125,11 @@ async def test_conversation() -> None:
     config = {"configurable": {"thread_id": "flow_test"}}
 
     user_messages = [
-        # { "messages": [HumanMessage("hello")]  },
-        # { "messages": [HumanMessage("What is your purpose?")] },
-        # { "messages": [HumanMessage("how do I use you?")] },
-        # { "messages": [HumanMessage("how do I provide you a picture?")] },
-        { "messages": [HumanMessage("Here is my room: 'C:\\Users\\Ato_K\\Downloads\\living_room.jpg'")] }
+        { "messages": [HumanMessage("hello")]  },
+        { "messages": [HumanMessage("What is your purpose?")] },
+        { "messages": [HumanMessage("how do I use you?")] },
+        { "messages": [HumanMessage("how do I provide you a picture?")] },
+        { "messages": [HumanMessage("Here is my room: 'static\\dirty_room.jpg'")] }
     ]
     num = 0
     for message in user_messages:
