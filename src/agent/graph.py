@@ -25,6 +25,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.runtime import Runtime
 from pathlib import Path
 
+from agent.prompts import AGENT_PERSONA
+from langgraph.checkpoint.memory import MemorySaver
+
 load_dotenv()
 
 
@@ -124,11 +127,8 @@ class ContextSchema(BaseModel):
     llm_configuration: LLMConfiguration = LLMConfiguration()
     persona: str = Field(
         default = (
-            "Your name is RoomCleanlinessEvaluator\n" +
-            "You are a specialist at knowing the cleanliness of a room.\n"+
-            "Your task is to provide the user information about the cleaniless of their room.\n"+
-            "If the user's prompt is not related to the cleanliness of a room, then respond with 'I cannot answer that question, I am only an expert at knowing the cleanliness of rooms'\n"
-        ),
+           AGENT_PERSONA
+           ),
         description = "The persona for the assistant",
         json_schema_extra={
             "langgraph_nodes": ["room_evaluator"],
@@ -193,6 +193,7 @@ async def prompt_rejecter(state: State, runtime: Runtime[ContextSchema]) -> Stat
     )
 
 graphName = "Room Logic Agent"
+memory = MemorySaver()
 graph = ( 
     StateGraph(State, context_schema =ContextSchema)
     .add_node("room_evaluator",room_evaluator)
@@ -205,6 +206,7 @@ graph = (
     .add_edge("prompt_editor","room_evaluator")
     .add_edge("prompt_rejecter",END)
     .compile(
-        name=graphName
+        name=graphName,
+        checkpointer = memory 
         )
 )
