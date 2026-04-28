@@ -41,3 +41,10 @@ jobs:
           LANGSMITH_TRACING: true
         run: |
           uv run pytest tests/integration_tests
+      - name: Upload Test Reports
+        if: always() # Ensures reports upload even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: room-logic-test-results
+          path: |
+            report.html
