@@ -10,7 +10,7 @@ class Evaluation(BaseModel):
 
 # 2. Set up the Judge. This is how you set up a langchain (different from langgraph) with a structured output.
 judge_llm = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
+        model="gemini-flash-lite-latest",
         temperature=1.0,
         max_tokens=None,
         timeout=None,

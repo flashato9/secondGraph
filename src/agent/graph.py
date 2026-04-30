@@ -12,7 +12,7 @@ from typing import Annotated, Literal
 
 from dotenv import load_dotenv
 from langgraph.graph import END, START, StateGraph, add_messages
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import InjectedState, ToolNode, tools_condition
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, RemoveMessage, SystemMessage
 from langgraph.types import Command, interrupt
 from langchain_core.messages import convert_to_messages
@@ -28,54 +28,16 @@ from pathlib import Path
 from agent.prompts import AGENT_PERSONA
 from langgraph.checkpoint.memory import MemorySaver
 
-load_dotenv()
+from agent.tools import delete_image, get_image_database, getPicture, upload_latest_image
 
+load_dotenv()
+tools = [getPicture,upload_latest_image, get_image_database,delete_image]
 
 def add_reducer(existing_message:list[AnyMessage], new_message: list[AnyMessage]) -> list[AnyMessage]:
     # note to self, the reducer applies to a member of the state. It takes two of the same type of memeber and generates one.
     add_messages_result = add_messages(existing_message,new_message)
     result = [elem for elem in add_messages_result]
     return result
-
-async def getPicture(path: str) -> list:
-    #note to self: the input to a tool is the input that your function should take. The LLM will figureout the input to use for the function. Just make sure to include type hints, doc string
-    #note to self: tool functions return a list of content blocks. The ToolNode() will assign this list the content member of a ToolMessage
-    #note to self: each element in the content block is fed to the model in the order of its specification. Each content block has a type and content.
-    #note to self: when you return the image_url content the model will embedd the image and load it into its context for memory.
-    """Get the bytes to an image.
-
-    Args:
-        path: path to image file
-    Returns:
-        A human message containing the image bytes.
-    """
-    image_bytes = None
-    async with aiofiles.open(path, mode='rb') as f:
-        image_bytes = await f.read()
-    file_extension = Path(path).suffix.replace(".","")
-    image64 = base64.b64encode(image_bytes).decode("utf-8")
-    mime_type = f"image/{file_extension}"
-    content =[
-        # {
-        #     "type": "text",
-        #     "text": "Describe the contents of this image."
-        # },
-        # {
-        #     "type":"image",
-        #     "base64": image64,
-        #     "mime_type": mime_type,
-        # },
-        {
-            "type": "image_url",
-            "image_url": {
-                    "url": f"data:{mime_type};base64,{image64}"
-                },
-        },
-        
-    ]
-    return content
-
-
 
 async def get_llm(llm_config: LLMConfiguration):
     model = ChatGoogleGenerativeAI(
@@ -85,12 +47,11 @@ async def get_llm(llm_config: LLMConfiguration):
         timeout=None,
         max_retries=2,
         )
-    tools = [getPicture]
     llm_with_tools = model.bind_tools(tools)
     return llm_with_tools
 
 
-def compress_text_content(message:AIMessage):
+def consolidate_disjoint_text_content(message:AIMessage):
     #note to self: the content here is also a list of content blocks. A multi-modal model accepts as input a list of content blocks and returns as output a list of content blocks.
     content = message.content
     result_content = None
@@ -116,7 +77,7 @@ class State(TypedDict):
     
 class LLMConfiguration(BaseModel):
     "the configuration for the llm"
-    model_name: str = "gemini-2.5-flash"
+    model_name: str = "gemini-flash-lite-latest"
     temperature: float = 1.0
 
 class ContextSchema(BaseModel):
@@ -144,7 +105,7 @@ async def room_evaluator(state: State, runtime: Runtime[ContextSchema]) -> State
     llm_config = runtime.context.llm_configuration
     llm_with_tools = await get_llm(llm_config)
     ai_message = await llm_with_tools.ainvoke([llm_persona] + model_input)
-    ai_message = compress_text_content(ai_message)
+    ai_message = consolidate_disjoint_text_content(ai_message)
     result = State(
         messages = [ai_message]
     )
@@ -191,22 +152,23 @@ async def prompt_rejecter(state: State, runtime: Runtime[ContextSchema]) -> Stat
     return State(
         messages = messages_to_remove
     )
-
-graphName = "Room Logic Agent"
-memory = MemorySaver()
-graph = ( 
-    StateGraph(State, context_schema =ContextSchema)
+def get_graph():
+    res = (StateGraph(State, context_schema =ContextSchema)
     .add_node("room_evaluator",room_evaluator)
     .add_node("prompt_editor",prompt_editor)
     .add_node("prompt_rejecter",prompt_rejecter)
-    .add_node("tools",ToolNode([getPicture]))
+    .add_node("tools",ToolNode(tools))
     .add_edge(START, "room_evaluator")
     .add_edge("tools","room_evaluator")
     .add_conditional_edges("room_evaluator",toolApprover)
     .add_edge("prompt_editor","room_evaluator")
     .add_edge("prompt_rejecter",END)
-    .compile(
-        name=graphName,
-        checkpointer = memory 
+    )
+    return res
+
+graphName = "Room Logic Agent"
+graph = ( get_graph()
+            .compile(
+                name=graphName
         )
 )
