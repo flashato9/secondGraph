@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 .langgraph_api/
 report.html
+.agent_data/vectors/

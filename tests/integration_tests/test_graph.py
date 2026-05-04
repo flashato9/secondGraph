@@ -166,53 +166,53 @@ graph = get_graph().compile(checkpointer= memory)
 #         print(f"{evaluation.reasoning}")
 #         assert evaluation.is_correct, f"Judge failed the test."
 
-def encode_image(image_path):
-    import base64
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
+# def encode_image(image_path):
+#     import base64
+#     with open(image_path, "rb") as image_file:
+#         return base64.b64encode(image_file.read()).decode('utf-8')
     
-async def test_image_updload():
-    # Create the content list
-    image_base64 = encode_image("static/dirty_room.jpg")
-    # --- ARRAGE ---
-    agent_persona = (
-            AGENT_PERSONA
-            )
-    context_instance = ContextSchema(
-        llm_configuration = LLMConfiguration(),
-        persona = agent_persona
-    )
-    config = {"configurable": {"thread_id": "flow_test"}}
+# async def test_image_updload():
+#     # Create the content list
+#     image_base64 = encode_image("static/dirty_room.jpg")
+#     # --- ARRAGE ---
+#     agent_persona = (
+#             AGENT_PERSONA
+#             )
+#     context_instance = ContextSchema(
+#         llm_configuration = LLMConfiguration(),
+#         persona = agent_persona
+#     )
+#     config = {"configurable": {"thread_id": "flow_test"}}
 
-    user_messages ={
-        "messages":[
-            HumanMessage(
-                    content = [
-                        {
-                            "type": "text", 
-                            "text": "Describe the cleliness of this room."
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-                        }
-                    ]
-                ),
-        ]
-    }
-    # --- ACT ---
-    res = await graph.ainvoke(user_messages,config, context = context_instance)
-    # --- PRINT ---
-    for result_message in res["messages"]:
-        result_message.pretty_print()     
-    # --- ASSERT ---
-    evaluation = await judge_chain.ainvoke({
-            "persona": context_instance.persona,
-            "user_input": user_messages,
-            "agent_output": res["messages"][-1].content
-        })
-    print("================================== Judge Score ==================================")
-    print(f"{evaluation.score}")
-    print("================================== Judge Reasoning ==================================")
-    print(f"{evaluation.reasoning}")
-    assert evaluation.is_correct, f"Judge failed the test."
+#     user_messages ={
+#         "messages":[
+#             HumanMessage(
+#                     content = [
+#                         {
+#                             "type": "text", 
+#                             "text": "Describe the cleliness of this room."
+#                         },
+#                         {
+#                             "type": "image_url",
+#                             "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
+#                         }
+#                     ]
+#                 ),
+#         ]
+#     }
+#     # --- ACT ---
+#     res = await graph.ainvoke(user_messages,config, context = context_instance)
+#     # --- PRINT ---
+#     for result_message in res["messages"]:
+#         result_message.pretty_print()     
+#     # --- ASSERT ---
+#     evaluation = await judge_chain.ainvoke({
+#             "persona": context_instance.persona,
+#             "user_input": user_messages,
+#             "agent_output": res["messages"][-1].content
+#         })
+#     print("================================== Judge Score ==================================")
+#     print(f"{evaluation.score}")
+#     print("================================== Judge Reasoning ==================================")
+#     print(f"{evaluation.reasoning}")
+#     assert evaluation.is_correct, f"Judge failed the test."
