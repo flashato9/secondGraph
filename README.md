@@ -1,19 +1,29 @@
 # SemanticOS
 
-An intelligent agent powered by LangGraph for interactive conversations and decision-making.
+Imagine a computer that finally **speaks human**. 
+- No more fighting with command lines.
+- No more drowning in open tabs.
+- No more hunting through endless folders for a photo you can see in your mind but can't find on your drive. 
 
-## Quick Start
+Stop operating a machine and start directing a digital partner. 
+Powered by LangGraph, this intelligent agent harness handles the entire execution—from fetching live APIs to navigating your local system—based on a single natural language request. 
 
-### 1. Install Docker
+You **define the what**, your **computer figures out the how**.
 
-Download and install Docker from [docker.com](https://www.docker.com/products/docker-desktop).
+## How to use it?
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/flashato9/SemanticOS.git
+```
 
 ### 2. Run the Application
 
 From the project directory, run:
 
 ```bash
-langgraph up -d .\docker-compose.debug.yml
+langgraph dev --allow-blocking --debug-port 5679
 ```
 
 This starts the LangGraph server and required services in the background.
