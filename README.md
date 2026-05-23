@@ -44,6 +44,5 @@ The chat interface will be available for you to interact with.
 Simply type your messages in the chat box and press Enter. The agent will respond with intelligent replies based on the configured logic and tools.
 
 <div align="center">
-  <img src="./static/README/chat_screenshot.png" alt="Chat interface" width="75%" />
+  <img src="./static/README/chat_screenshot.png" alt="Chat interface. Powered by LangGraph" width="75%" />
 </div>
-
