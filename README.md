@@ -24,7 +24,7 @@ git clone https://github.com/flashato9/SemanticOS.git
 From the project directory, run:
 
 ```bash
-langgraph dev --allow-blocking --debug-port 5679
+langgraph dev --no-reload --allow-blocking --debug-port 5679
 ```
 
 This starts the LangGraph server and required services in the background.

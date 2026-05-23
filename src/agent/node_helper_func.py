@@ -16,6 +16,7 @@ def get_message_flatten_text_content(message: AIMessage) -> AIMessage:
     images, or other non-text blocks.
     """
     if isinstance(message.content, str):
+        message.content = [{"type": "text", "text": message.content}]
         return message
 
     if isinstance(message.content, list):

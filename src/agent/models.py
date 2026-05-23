@@ -43,7 +43,7 @@ class ContextSchema(BaseModel):
         }
     )
     message_threshold: int = Field(
-        default=100,
+        default=50,
         description="The number of recent messages to include in the context for decision making. Older messages will be summarized into the 'meaning' field of ToolResult."
     )
     tool_config: ToolsConfig = ToolsConfig()

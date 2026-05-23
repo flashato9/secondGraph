@@ -167,7 +167,7 @@ def get_last_turn_messages(messages: list[AnyMessage]) -> list[AnyMessage]:
 async def summarizer(state: State, runtime: Runtime[ContextSchema]) -> State:
     llm_config = runtime.context.llm_configuration
     llm_with_tools = await get_llm(llm_config, tools=[]) # No tools for summarization step
-    message_threshold = 15
+    message_threshold = runtime.context.message_threshold
     number_messages_to_keep = int(message_threshold*0.45)
     messages = state["messages"]
     cutoff_index = len(messages) - number_messages_to_keep
@@ -198,6 +198,7 @@ async def summarizer(state: State, runtime: Runtime[ContextSchema]) -> State:
         past_messages = messages[:cutoff_index] 
         llm_input = past_messages + [system_prompt] + [summary_prompt]
         ai_response = await llm_with_tools.ainvoke(llm_input)
+        ai_response = get_message_flatten_text_content(ai_response)
         ai_response_as_syastem_message = SystemMessage(content=ai_response.content[0]["text"])
         ai_response_as_syastem_message.id = str(uuid.uuid4())
         removed_past_messages = [RemoveMessage(id=msg.id) for msg in messages[:cutoff_index]]

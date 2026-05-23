@@ -8,7 +8,7 @@ from langchain_experimental.utilities import PythonREPL
 from langchain_core.tools import InjectedToolArg, tool
 from langchain_core.tools import tool
 from langchain_experimental.utilities import PythonREPL
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, List, Optional
 from langgraph.prebuilt import ToolRuntime
 from pydantic import BaseModel, Field
 from langgraph.runtime import Runtime
@@ -440,46 +440,56 @@ def patch_file(
 @tool
 def execute_file(
     filename: str, 
+    cmd_args: List[str], # Changed from 'args' to avoid LangChain internal naming collisions
     runtime_config: ToolRuntime[ContextSchema]
 ) -> dict:
     """
     Executes a Python script located in the agent's workspace, with built-in guardrails.
     Args:
-    filename: Relative path to the Python script within the agent's allowed directory.
-    runtime_config: The configuration for the tool execution, which may include:
-        - workspace_root: The root directory for the agent's file operations.
-        - execution_timeout: Maximum time in seconds to allow the script to run (to prevent infinite loops).
+        filename: Relative path to the Python script within the agent's allowed directory.
+        cmd_args: list of string arguments to pass to the script (e.g. ["--mode", "train", "data.csv"]). Provide [] for empty args
+        runtime_config: The configuration for the tool execution, which may include:
+            - workspace_root: The root directory for the agent's file operations.
+            - execution_timeout: Maximum time in seconds to allow the script to run (to prevent infinite loops).
     Returns:
-    A structured response containing:
-    - success: Whether the execution was successful.
-    - output: If successful, includes stdout and return code.
-    - error: If failed, a detailed error message or stderr output.
-    - meaning: A human-readable summary for the agent's context, guiding its next steps.
+        A structured response containing:
+        - success: Whether the execution was successful.
+        - output: If successful, includes stdout and return code.
+        - error: If failed, a detailed error message or stderr output.
+        - meaning: A human-readable summary for the agent's context, guiding its next steps.
 
     """
     workspace_root = runtime_config.context.tool_config.workspace_root
     timeout = int(runtime_config.context.tool_config.execution_timeout)
+    
     try:
         # 1. Path Validation
         root = Path(workspace_root).resolve()
         target_path = (root / filename).resolve()
         if not str(target_path).startswith(str(root)):
             raise PermissionError("Execution outside sandbox blocked.")
-
         if not target_path.exists():
             raise FileNotFoundError(f"File '{filename}' not found.")
+            
+        # 2. Build Subprocess Command List
+        # Base command: [python, script_path]
+        cmd = [sys.executable, str(target_path)]
+        
+        # Safely append arguments if the agent provided any
+        if cmd_args or len(cmd_args) > 0:
+            # Enforce that all items are strings to prevent subprocess typing crashes
+            cmd.extend([str(a) for a in cmd_args])
 
-        # 2. Subprocess Execution
-        # We use sys.executable to ensure we use the same environment
+        # 3. Subprocess Execution
         process = subprocess.run(
-            [sys.executable, str(target_path)],
+            cmd,
             capture_output=True,
             text=True,
             timeout=timeout,
-            cwd=str(root) # Ensure relative imports/files work for the script
+            cwd=str(root)  # Ensures the script can resolve workspace-relative imports
         )
-
-        # 3. Handle Results
+        
+        # 4. Handle Results
         if process.returncode == 0:
             result = ToolResult(
                 success=True,
@@ -494,7 +504,7 @@ def execute_file(
                 error=process.stderr,
                 meaning=f"Execution failed with code {process.returncode}:\n{process.stderr}"
             )
-
+            
     except subprocess.TimeoutExpired:
         result = ToolResult(
             success=False,
@@ -509,8 +519,9 @@ def execute_file(
             error=str(e),
             meaning=f"System error during execution: {str(e)}"
         )
-
+        
     return result.to_state_update()
+
 @tool
 def get_directory_contents(
     target_dir: str,
