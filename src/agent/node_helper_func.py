@@ -81,7 +81,7 @@ async def get_llm(llm_config: LLMConfiguration, tools: list = ALL_TOOLS) -> LLM:
         temperature=llm_config.temperature,
         max_tokens=None,
         timeout=None,
-        max_retries=5,
+        max_retries=5
         )
     llm = model.bind_tools(tools)
     return llm
@@ -122,7 +122,10 @@ async def consolidate_and_verify(insight: MemoryInsight, lineage: list, config: 
     """
     
     prompt = f"NEW INSIGHT: {insight.content}\n\nHISTORY:\n{lineage_text}"
-    return await model.ainvoke([SystemMessage(content=system_prompt), HumanMessage(content=prompt)])
+    return await model.ainvoke(
+        [SystemMessage(content=system_prompt), HumanMessage(content=prompt)],
+        config={"tags": ["nostream"]}
+        )
 
 async def get_existing_categories(namespace: tuple, store: BaseStore) -> List[str]:
     """
@@ -172,9 +175,12 @@ async def extract_new_insights(
     5. CONTENT: Write a clear, standalone sentence. If a user's preference changed during this session, only extract the final, most recent preference.
     """
     
-    extraction_result = await model.ainvoke([
+    extraction_result = await model.ainvoke(
+        [
         SystemMessage(content=system_prompt),
         HumanMessage(content=f"CONVERSATION TO REVIEW:\n{messages}")
-    ])
+        ],
+        config={"tags": ["nostream"]}
+    )
     
     return extraction_result.insights

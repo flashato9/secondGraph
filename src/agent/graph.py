@@ -197,7 +197,10 @@ async def summarizer(state: State, runtime: Runtime[ContextSchema]) -> State:
                                       """)
         past_messages = messages[:cutoff_index] 
         llm_input = past_messages + [system_prompt] + [summary_prompt]
-        ai_response = await llm_with_tools.ainvoke(llm_input)
+        ai_response = await llm_with_tools.ainvoke(
+                                                    llm_input,
+                                                    config={"tags": ["nostream"]}
+                                                  )
         ai_response = get_message_flatten_text_content(ai_response)
         ai_response_as_syastem_message = SystemMessage(content=ai_response.content[0]["text"])
         ai_response_as_syastem_message.id = str(uuid.uuid4())
@@ -232,7 +235,10 @@ async def brain(state: State, runtime: Runtime[ContextSchema], *, store: BaseSto
 
     # 4. LLM Execution
     llm_with_tools = await get_llm(llm_config)
-    ai_message = await llm_with_tools.ainvoke(final_messages)
+    ai_message = await llm_with_tools.ainvoke(
+                                                final_messages,
+                                                # config={"tags": ["nostream"]}
+                                             )
     
     # Flatten multi-block content for LangSmith/State consistency
     ai_message = get_message_flatten_text_content(ai_message)
